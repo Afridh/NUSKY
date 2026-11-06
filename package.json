@@ -1,0 +1,14 @@
+{
+  "name": "nusky-jewellers-pos",
+  "version": "1.0.0",
+  "description": "Centralised POS for Nusky Jewellers: gold sales, gold buying, stock, staff and customer messaging, and a live rate board for the shop TV.",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "test": "node --disable-warning=ExperimentalWarning test/smoke.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
