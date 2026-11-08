@@ -412,6 +412,19 @@ const NJ = {
   function connect() {
     if (stream) stream.close();
     stream = new EventSource('/api/events');
+    // A red band across the top while the shop server cannot be reached; the browser keeps retrying.
+    stream.onerror = () => {
+      if (!document.getElementById('offline')) {
+        document.body.append(h('div', { id: 'offline', role: 'alert', text: 'Cannot reach the shop server. Trying again. Check that the server computer is on.' }));
+      }
+    };
+    stream.onopen = () => {
+      const band = document.getElementById('offline');
+      if (band) {
+        band.remove();
+        toast('Connected to the shop server again', 'good');
+      }
+    };
     stream.addEventListener('rates', (e) => {
       NJ.state.rates = JSON.parse(e.data);
       renderRateStrip();
@@ -443,6 +456,8 @@ const NJ = {
     stream = null;
     NJ.state.me = null;
     document.body.classList.remove('pos-mode');
+    const band = document.getElementById('offline');
+    if (band) band.remove();
     for (const d of document.querySelectorAll('dialog')) d.remove();
     const username = h('input', { type: 'text', autocomplete: 'username', autofocus: true });
     const password = h('input', { type: 'password', autocomplete: 'current-password' });

@@ -1,5 +1,5 @@
 'use strict';
-// Today, stock, customers, past bills and vouchers, gold rates.
+// Stock, customers, past bills and vouchers, gold rates. The Today page is in today.js.
 (function () {
   const { h, api, plain, money, grams, dateTime, today, r2, val, rateFor, branchName, canManage, hallmark, karatSelect,
     field, toast, fail, modal, confirmBox, busy, customerForm, listen } = NJ;
@@ -7,38 +7,6 @@
   const branchSelect = (value, withAll) => h('select', { value: String(value || '') },
     withAll ? h('option', { value: '', text: 'All branches' }) : null,
     NJ.state.branches.map((b) => h('option', { value: String(b.id), text: b.name })));
-
-  // ----- today -----
-  NJ.pages['/'] = async (page) => {
-    const board = h('div', { class: 'board' });
-    function renderBoard() {
-      board.replaceChildren(...NJ.state.rates.map((r) => h('div', null, hallmark(r.karat),
-        h('small', { text: 'We sell at' }), h('div', { class: 'sell', text: plain(r.sell_rate) }),
-        h('div', { class: 'buy', text: `We buy at ${plain(r.buy_rate)}` }))));
-    }
-    renderBoard();
-    listen('nj:rates', renderBoard);
-
-    const notices = [];
-    if (NJ.state.rates.some((r) => !(r.sell_rate > 0))) {
-      notices.push(h('div', { class: 'notice' }, h('b', { text: "Today's gold rates are not set. " }),
-        canManage() ? h('a', { href: '#/rates' }, 'Set the rates') : 'Ask a manager to set them before you sell.'));
-    }
-
-    const s = await api('GET', '/api/reports/summary');
-    const scope = NJ.state.me.role === 'cashier' ? branchName(NJ.state.me.branch_id) : 'all branches';
-    page.append(...notices,
-      h('p', { class: 'muted', text: `Rates are per gram (${NJ.state.settings.currency}). Figures below are for today, ${scope}.` }),
-      board,
-      h('div', { class: 'figures' },
-        h('div', null, h('span', { text: 'Sales' }), h('b', { text: plain(s.sales.total) })),
-        h('div', null, h('span', { text: 'Bills' }), h('b', { text: String(s.sales.count) })),
-        h('div', null, h('span', { text: 'Gold bought' }), h('b', { text: plain(s.purchases.total) })),
-        h('div', null, h('span', { text: 'Cash in the drawer from today' }), h('b', { text: plain(s.cash_drawer) }))),
-      h('div', { class: 'row', style: 'max-width:520px' },
-        h('a', { class: 'btn primary big', href: '#/sell' }, 'Start a sale'),
-        h('a', { class: 'btn big', href: '#/buy' }, 'Buy gold')));
-  };
 
   // ----- stock -----
   function itemForm(existing) {
