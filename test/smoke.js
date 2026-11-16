@@ -266,6 +266,23 @@ async function main() {
   r = await admin('PUT', '/api/tv', { points: [['a', 'b'], ['a', 'b'], ['a', 'b'], ['a', 'b']] });
   assert.strictEqual(r.status, 400, 'at most three selling points');
 
+  // TV designs: /tv serves the saved design, ?theme= previews another, unknown names are refused
+  let page = await (await fetch(BASE + '/tv')).text();
+  assert.match(page, /"Royal"|\?theme=royal\|emerald|Five designs/, 'default design is the royal board');
+  r = await admin('PUT', '/api/tv', { theme: 'neon' });
+  assert.strictEqual(r.status, 400);
+  for (const [theme, marker] of [['cinema', 'Cinema'], ['exchange', 'Exchange'], ['spotlight', 'Spotlight'], ['boutique', 'Boutique']]) {
+    page = await (await fetch(`${BASE}/tv?theme=${theme}`)).text();
+    assert.ok(page.includes(`"${marker}" TV design`), `${theme} is served on request`);
+  }
+  r = await admin('PUT', '/api/tv', { theme: 'exchange' });
+  assert.strictEqual(r.data.theme, 'exchange');
+  assert.ok(typeof r.data.rates[0].previous_sell_rate !== 'undefined', 'the previous rate is sent for the exchange board');
+  page = await (await fetch(BASE + '/tv')).text();
+  assert.ok(page.includes('"Exchange" TV design'), '/tv now serves the saved design');
+  r = await admin('PUT', '/api/tv', { theme: 'royal' });
+  assert.strictEqual(r.data.theme, 'royal');
+
   // TV slideshow pictures
   const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
   r = await cashier('POST', '/api/tv/images', { data: png });

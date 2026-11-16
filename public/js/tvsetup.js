@@ -96,11 +96,12 @@
     // ----- wording -----
     // ----- design -----
     const DESIGNS = [
-      ['royal', 'Royal gold', 'Black and gold, photo beside the prices. The look from the reference picture.'],
-      ['emerald', 'Emerald', 'Deep green and gold, matching the counter screens.'],
-      ['ruby', 'Ruby', 'Deep red and gold.'],
-      ['ivory', 'Ivory', 'Light cream and gold for a bright showroom.'],
-      ['board', 'Classic board', 'No photo. Selling and buying prices right across the screen, for a shop that wants prices only.'],
+      ['royal', 'Royal gold', 'Black and gold with the photo beside the prices. Light sweeps over the karat tabs; prices count up.'],
+      ['cinema', 'Cinema', 'Your photos fill the whole screen with slow camera moves; prices float over them in glass cards.'],
+      ['exchange', 'Exchange', 'A trading-floor board: flipping digits, up and down arrows against the previous rate, a scrolling LED line.'],
+      ['spotlight', 'Spotlight', 'One karat at a time, enormous, changing every few seconds over a blurred photo.'],
+      ['boutique', 'Boutique', 'Light and elegant, like a catalogue page. Gold ornaments draw themselves; prices melt and settle.'],
+      ['board', 'Classic board', 'No photo. Selling and buying prices right across the screen.'],
     ];
     let theme = tv.theme || 'royal';
     const designs = h('div', { class: 'designs' }, DESIGNS.map(([id, name, note]) => h('label', { class: `design ${id === theme ? 'on' : ''}` },

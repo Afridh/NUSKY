@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gold price today</title>
+  <link rel="icon" href="data:,">
+  <!-- "Exchange" TV design: a trading-floor board. Flipping digits, up/down against the previous rate, a scrolling LED line. -->
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #e8e2cf; cursor: none; background: #030303; }
+    .mono { font-family: Consolas, 'Lucida Console', 'Courier New', monospace; }
+    .hide { display: none !important; }
+    .amber { color: #ffb300; text-shadow: 0 0 1.2vh rgba(255, 179, 0, .55); }
+    .up { color: #39e07a; text-shadow: 0 0 1.2vh rgba(57, 224, 122, .5); }
+    .down { color: #ff4d4d; text-shadow: 0 0 1.2vh rgba(255, 77, 77, .5); }
+
+    /* a faint grid and scanlines, like a real board */
+    .grid { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(rgba(255, 179, 0, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 179, 0, .035) 1px, transparent 1px); background-size: 4vh 4vh; }
+    .lines { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0) 0 3px, rgba(0, 0, 0, .25) 3px 4px); pointer-events: none; }
+    .screen { position: relative; height: 100vh; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; padding: 2.2vh 2.4vw 1.8vh; }
+
+    header { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; height: 11vh; border-bottom: .3vh solid #4a3300; }
+    h1 { margin: 0; font-size: 5.6vh; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h1 small { display: block; font-size: 2.2vh; letter-spacing: .4em; color: #c9b98a; text-shadow: none; margin-top: .6vh; }
+    .live { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; font-size: 2.4vh; letter-spacing: .3em; text-transform: uppercase; color: #c9b98a; }
+    .live i { width: 1.8vh; height: 1.8vh; border-radius: 50%; background: #39e07a; box-shadow: 0 0 1.6vh #39e07a; margin-right: 1vw; animation: blink 1.2s steps(1) infinite; }
+    .clock { font-size: 7vh; font-weight: 700; letter-spacing: .1em; }
+    .clock .colon { animation: blink 1s steps(1) infinite; }
+    .clock small { font-size: 2.6vh; margin-left: .6vw; letter-spacing: .2em; }
+
+    .board { position: relative; -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; min-height: 0; padding-top: 1.2vh; }
+    .hdr, .row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
+    .hdr { height: 6vh; font-size: 2.4vh; letter-spacing: .3em; text-transform: uppercase; color: #c9b98a; border-bottom: 1px solid #332400; }
+    .row { -webkit-flex: 1; flex: 1; border-bottom: 1px solid #1f1600; animation: fadein .6s ease both; }
+    .row:nth-child(3) { animation-delay: .15s; }
+    .row:nth-child(4) { animation-delay: .3s; }
+    .row:nth-child(5) { animation-delay: .45s; }
+    .c1 { width: 14%; } .c2 { width: 12%; } .c3 { width: 30%; text-align: right; } .c4 { width: 26%; text-align: right; } .c5 { width: 18%; text-align: right; }
+    .row .c1 { font-size: 8.5vh; font-weight: 800; }
+    .row .c2 { font-size: 3.4vh; letter-spacing: .3em; color: #c9b98a; }
+    .row .c3 { font-size: 8.5vh; font-weight: 700; }
+    .row .c4 { font-size: 6.2vh; font-weight: 600; color: #e8e2cf; }
+    .row .c5 { font-size: 4.6vh; font-weight: 700; white-space: nowrap; }
+    .row .c5 .arrow { font-size: 1.1em; margin-right: .4vw; }
+    .unit { font-size: 2.2vh; letter-spacing: .3em; text-transform: uppercase; color: #c9b98a; text-align: right; padding: .6vh 0 0; }
+
+    /* split-flap digits */
+    .digits { display: inline-block; white-space: nowrap; }
+    .d { display: inline-block; position: relative; perspective: 30vh; -webkit-perspective: 30vh; }
+    .d.flip { animation: flip .55s cubic-bezier(.3, .7, .3, 1) both; }
+    .d.spin { animation: spin .09s linear infinite; }
+    @keyframes flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(-90deg); filter: brightness(1.8); } 100% { transform: rotateX(0); } }
+    @keyframes spin { from { transform: translateY(-6%); opacity: .75; } to { transform: translateY(6%); opacity: 1; } }
+
+    /* a light that scans down the board */
+    .scan { position: absolute; left: 0; right: 0; top: 7vh; height: .4vh; background: linear-gradient(90deg, rgba(255, 179, 0, 0), rgba(255, 179, 0, .9), rgba(255, 179, 0, 0)); box-shadow: 0 0 2vh rgba(255, 179, 0, .8); animation: scan 6s linear infinite; pointer-events: none; }
+    @keyframes scan { 0% { top: 7vh; opacity: 0; } 5% { opacity: 1; } 95% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+    .ledline { -webkit-flex: none; flex: none; height: 6.4vh; margin-top: 1.4vh; border-top: .3vh solid #4a3300; border-bottom: .3vh solid #4a3300; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; background: #0a0700; }
+    .ledline .tag { -webkit-flex: none; flex: none; padding: 0 1.4vw; font-size: 2.4vh; letter-spacing: .3em; text-transform: uppercase; color: #c9b98a; border-right: 1px solid #332400; height: 100%; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
+    .run { -webkit-flex: 1; flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; font-size: 3.6vh; font-weight: 700; letter-spacing: .06em; }
+    .run div { display: inline-block; }
+    .run span { display: inline-block; white-space: pre; }
+    .ledline.white .run { color: #e8e2cf; text-shadow: none; font-weight: 600; letter-spacing: .04em; }
+    @keyframes tvmarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .foot { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; font-size: 2.1vh; letter-spacing: .2em; text-transform: uppercase; color: #8d7d55; padding-top: 1vh; }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    .offline { position: fixed; right: 1vw; top: 1vh; font-size: 1.8vh; color: #c9b98a; display: none; }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="screen">
+    <header>
+      <h1 class="mono amber" id="shop">Nusky Jewellers<small id="sub"></small></h1>
+      <div class="live"><i></i>Live gold prices</div>
+      <div class="clock mono amber"><span id="hh"></span><span class="colon">:</span><span id="mm"></span><small id="ap"></small></div>
+    </header>
+    <div class="board">
+      <div class="unit mono" id="unit"></div>
+      <div class="hdr mono"><div class="c1">Karat</div><div class="c2">Fineness</div><div class="c3">We sell</div><div class="c4">We buy</div><div class="c5">Change</div></div>
+      <div id="rows"></div>
+      <div class="scan"></div>
+    </div>
+    <div class="ledline"><div class="tag mono">Rates</div><div class="run mono amber" id="run1"></div></div>
+    <div class="ledline white hide" id="line2"><div class="tag mono">Notice</div><div class="run mono" id="run2"></div></div>
+    <div class="foot mono"><span id="updated"></span><span id="date"></span><span id="phone"></span></div>
+  </div>
+  <div class="lines"></div>
+  <div class="offline" id="offline">Reconnecting to the shop server</div>
+
+  <script src="/js/tv-common.js"></script>
+  <script>
+    (function () {
+      var T = window.TV;
+      var el = function (id) { return document.getElementById(id); };
+      var rows = {};
+      var shown = {};
+      var first = true;
+
+      T.clock(function (c) {
+        el('hh').textContent = c.hh;
+        el('mm').textContent = c.mm;
+        el('ap').textContent = c.ampm;
+        el('date').textContent = c.dayShort + ' ' + c.dom2 + ' ' + c.monthShort + ' ' + c.year;
+      });
+
+      // Text made of split-flap characters. Changing it flips only the characters that differ.
+      function flapper(node) {
+        var chars = [];
+        function setText(text, spinFirst) {
+          var want = text.split('');
+          while (chars.length > want.length) { node.removeChild(chars.pop()); }
+          while (chars.length < want.length) {
+            var d = T.make('span', 'd', ' ');
+            node.insertBefore(d, node.firstChild);
+            chars.unshift(d);
+          }
+          for (var i = 0; i < want.length; i++) {
+            (function (span, ch, i) {
+              if (span.textContent === ch && !spinFirst) return;
+              if (T.calm) { span.textContent = ch; return; }
+              if (spinFirst && /\d/.test(ch)) {
+                // like a departure board: digits whirr, then settle from the left
+                span.className = 'd spin';
+                var whirr = setInterval(function () { span.textContent = String(Math.floor(Math.random() * 10)); }, 70);
+                setTimeout(function () { clearInterval(whirr); span.textContent = ch; span.className = 'd flip'; }, 500 + i * 120);
+              } else {
+                span.className = 'd';
+                void span.offsetWidth;
+                span.className = 'd flip';
+                span.style.animationDelay = (i * 45) + 'ms';
+                setTimeout(function () { span.textContent = ch; }, 270 + i * 45);
+              }
+            })(chars[i], want[i], i);
+          }
+        }
+        return { set: setText };
+      }
+
+      function row(karat) {
+        var r = T.make('div', 'row mono');
+        var c1 = T.make('div', 'c1 amber', karat + 'K');
+        var c2 = T.make('div', 'c2', T.FINENESS[karat] || '');
+        var c3 = T.make('div', 'c3 amber');
+        var sell = T.make('span', 'digits');
+        c3.appendChild(sell);
+        var c4 = T.make('div', 'c4');
+        var buy = T.make('span', 'digits');
+        c4.appendChild(buy);
+        var c5 = T.make('div', 'c5');
+        r.appendChild(c1); r.appendChild(c2); r.appendChild(c3); r.appendChild(c4); r.appendChild(c5);
+        el('rows').appendChild(r);
+        rows[karat] = { sell: flapper(sell), buy: flapper(buy), change: c5 };
+        return rows[karat];
+      }
+
+      function render(data) {
+        el('shop').firstChild.textContent = data.shop_name || 'Nusky Jewellers';
+        el('sub').textContent = data.subtitle || '';
+        el('unit').textContent = T.unitLabel(data);
+        var summary = [];
+        for (var i = 0; i < data.rates.length; i++) {
+          var r = data.rates[i];
+          var rw = rows[r.karat] || row(r.karat);
+          var sell = T.unitValue(r.sell_rate, data);
+          var buy = T.unitValue(r.buy_rate, data);
+          var prev = r.previous_sell_rate ? T.unitValue(r.previous_sell_rate, data) : 0;
+          var change = prev && sell ? sell - prev : 0;
+          var key = sell + '|' + buy;
+          if (shown[r.karat] !== key) {
+            rw.sell.set(T.price(sell), first);
+            rw.buy.set(T.price(buy), first);
+            shown[r.karat] = key;
+          }
+          rw.change.innerHTML = '';
+          if (change) {
+            var arrow = T.make('span', 'arrow', change > 0 ? '▲' : '▼');
+            rw.change.appendChild(arrow);
+            rw.change.appendChild(document.createTextNode(T.price(Math.abs(change))));
+            rw.change.className = 'c5 ' + (change > 0 ? 'up' : 'down');
+          } else {
+            rw.change.textContent = '—';
+            rw.change.className = 'c5';
+          }
+          summary.push(r.karat + 'K  ' + T.price(sell) + (change ? (change > 0 ? '  ▲ ' : '  ▼ ') + T.price(Math.abs(change)) : ''));
+        }
+        first = false;
+        T.marquee(el('run1').parentNode, el('run1'), summary.join('      •      '), 14);
+        var notice = [];
+        if (data.message) notice.push(data.message);
+        for (var n = 0; n < (data.points || []).length; n++) notice.push(data.points[n][0] + (data.points[n][1] ? ': ' + data.points[n][1] : ''));
+        T.marquee(el('line2'), el('run2'), notice.join('      •      '), 18);
+        var at = T.updatedAt(data);
+        el('updated').textContent = at ? 'Updated ' + at : '';
+        el('phone').textContent = data.phone ? 'Call ' + data.phone : '';
+      }
+
+      T.start(render, el('offline'), 'exchange');
+    })();
+  </script>
+</body>
+</html>

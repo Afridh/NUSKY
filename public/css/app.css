@@ -552,3 +552,7 @@ dialog footer { display: flex; justify-content: flex-end; gap: .6rem; padding: .
 .sw-ruby { background: linear-gradient(135deg, #160406 55%, #b8862b 56%, #f6dc8d 75%, #b8862b); }
 .sw-ivory { background: linear-gradient(135deg, #f3ecdc 55%, #c9952b 56%, #e6bb4f 75%, #9a7320); }
 .sw-board { background: repeating-linear-gradient(180deg, #050403 0 9px, #b8862b 9px 11px); }
+.sw-cinema { background: radial-gradient(circle at 70% 30%, #6b4a12, #0a0703 60%); box-shadow: inset 8px -8px 0 -4px rgba(255,255,255,.25); }
+.sw-exchange { background: #050505 repeating-linear-gradient(180deg, transparent 0 7px, rgba(255,179,0,.35) 7px 9px); border-color: #ffb300 !important; }
+.sw-spotlight { background: radial-gradient(circle at 50% 50%, #f6dc8d 0 12%, rgba(246,220,141,0) 13%), conic-gradient(from 0deg, #1a1205, #3a2a0a, #1a1205, #3a2a0a, #1a1205); }
+.sw-boutique { background: linear-gradient(135deg, #faf6ee 60%, #efe6d1); box-shadow: inset 0 -10px 0 -8px #9a7320; }

@@ -142,7 +142,15 @@ setInterval(() => {
 }, 25000).unref();
 
 // The looks the TV board can wear. 'board' is the royal colours without the photo panel.
-const TV_THEMES = ['royal', 'emerald', 'ruby', 'ivory', 'board'];
+const TV_THEMES = ['royal', 'board', 'cinema', 'exchange', 'spotlight', 'boutique'];
+const TV_FILES = { royal: 'tv.html', board: 'tv.html', cinema: 'tv-cinema.html', exchange: 'tv-exchange.html', spotlight: 'tv-spotlight.html', boutique: 'tv-boutique.html' };
+
+// The page to serve at /tv: the design asked for with ?theme=, else the shop's saved one.
+function tvFileFor(requested) {
+  const saved = db.prepare("SELECT value FROM settings WHERE key = 'tv_theme'").get();
+  const theme = TV_THEMES.includes(requested) ? requested : saved && TV_THEMES.includes(saved.value) ? saved.value : 'royal';
+  return TV_FILES[theme];
+}
 
 const TV_DIR = path.join(DATA_DIR, 'tv');
 fs.mkdirSync(TV_DIR, { recursive: true });
@@ -177,8 +185,14 @@ function tvPayload() {
     theme: TV_THEMES.includes(s.tv_theme) ? s.tv_theme : 'royal',
     points: tvPoints(s.tv_points),
     images: tvImages(),
-    rates: getRates(),
+    rates: getRates().map((r) => ({ ...r, previous_sell_rate: previousSellRate(r.karat) })),
   };
+}
+
+// The selling rate before the current one, so a board can show the day's movement.
+function previousSellRate(karat) {
+  const row = db.prepare('SELECT sell_rate FROM rate_history WHERE karat = ? ORDER BY id DESC LIMIT 1 OFFSET 1').get(karat);
+  return row ? row.sell_rate : null;
 }
 
 // ---------- auth ----------
@@ -1361,4 +1375,4 @@ add('GET', '/api/backup', ['admin'], ({ res }) => {
   return RAW;
 });
 
-module.exports = { handleApi };
+module.exports = { handleApi, tvFileFor };

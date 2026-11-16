@@ -442,6 +442,7 @@
 
       function show(data) {
         el('offline').style.display = 'none';
+        if (!forcedTheme && data.theme && data.theme !== 'royal' && data.theme !== 'board') { window.location.replace('/tv'); return; }
         var themeBefore = seen.theme;
         applyTheme(forcedTheme || data.theme || 'royal');
         var name = data.shop_name || 'Nusky Jewellers';
@@ -559,6 +560,7 @@
         var onUpdate = function () { load(); };
         stream.addEventListener('rates', onUpdate);
         stream.addEventListener('tv', onUpdate);
+        window.addEventListener('pagehide', function () { stream.close(); });
       }
     })();
   </script>

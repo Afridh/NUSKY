@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gold price today</title>
+  <link rel="icon" href="data:,">
+  <!-- "Boutique" TV design: light and elegant, like a catalogue page. Ornaments draw themselves, prices fade softly. -->
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: #faf6ee; overflow: hidden; }
+    body { font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #2a1c00; cursor: none; background: #faf6ee; }
+    .serif { font-family: Cinzel, Constantia, 'Palatino Linotype', 'Book Antiqua', Georgia, serif; }
+    .hide { display: none !important; }
+
+    .bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 80% 20%, #fff 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(ellipse at 10% 90%, #f1e7d2 0%, rgba(241, 231, 210, 0) 55%), #faf6ee; }
+    /* soft bokeh drifting slowly across the page */
+    .bokeh i { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(201, 149, 43, .22), rgba(201, 149, 43, 0) 70%); animation: float 22s ease-in-out infinite alternate; }
+    .bokeh i:nth-child(1) { width: 40vh; height: 40vh; left: 5vw; top: 50vh; }
+    .bokeh i:nth-child(2) { width: 26vh; height: 26vh; left: 40vw; top: -8vh; animation-delay: -7s; animation-duration: 28s; }
+    .bokeh i:nth-child(3) { width: 34vh; height: 34vh; left: 70vw; top: 60vh; animation-delay: -14s; animation-duration: 25s; }
+    .bokeh i:nth-child(4) { width: 18vh; height: 18vh; left: 55vw; top: 30vh; animation-delay: -3s; animation-duration: 19s; }
+    @keyframes float { from { transform: translate(0, 0); } to { transform: translate(6vw, -8vh); } }
+
+    .screen { position: relative; height: 100vh; display: -webkit-flex; display: flex; padding: 5vh 5vw 16vh; }
+    .left { width: 54%; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; padding-right: 4vw; }
+    .right { width: 46%; position: relative; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; }
+
+    .ornament { width: 26vh; height: 5vh; }
+    .ornament path { fill: none; stroke: #9a7320; stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 3s ease-out .3s forwards, redraw 24s linear 6s infinite; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes redraw { 0%, 88% { stroke-dashoffset: 0; } 94% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
+    h1 { margin: 1.4vh 0 0; font-size: 7.6vh; font-weight: 400; line-height: 1.05; letter-spacing: .02em; color: #2a1c00; }
+    h1 span { display: inline-block; opacity: 0; animation: word 1.2s ease both; }
+    @keyframes word { from { opacity: 0; transform: translateY(1.2vh); letter-spacing: .3em; } to { opacity: 1; transform: none; letter-spacing: .02em; } }
+    .sub { margin: .8vh 0 0; font-size: 2.6vh; font-style: italic; color: #9a7320; letter-spacing: .12em; animation: fadein 1.4s ease 1.2s both; }
+    .rule { height: 1px; background: linear-gradient(90deg, #9a7320, rgba(154, 115, 32, 0)); margin: 3vh 0 2.2vh; transform-origin: left; animation: grow 1.6s cubic-bezier(.2, .8, .2, 1) 1s both; }
+    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    .unit { font-size: 2.2vh; letter-spacing: .35em; text-transform: uppercase; color: #7a6640; margin-bottom: 1.2vh; animation: fadein 1s ease 1.6s both; }
+    .list { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
+    .item { display: -webkit-flex; display: flex; -webkit-align-items: baseline; align-items: baseline; padding: 1.6vh 0; border-bottom: 1px solid rgba(154, 115, 32, .25); animation: fadeup .9s ease both; }
+    .item:nth-child(1) { animation-delay: 1.5s; } .item:nth-child(2) { animation-delay: 1.7s; } .item:nth-child(3) { animation-delay: 1.9s; } .item:nth-child(4) { animation-delay: 2.1s; }
+    .item .k { font-size: 5.4vh; font-weight: 400; white-space: nowrap; }
+    .item .k small { font-family: 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1.9vh; letter-spacing: .35em; color: #9a7320; margin-left: 1vw; vertical-align: .9vh; }
+    .item .leader { -webkit-flex: 1; flex: 1; margin: 0 1.4vw; border-bottom: 1px dotted rgba(42, 28, 0, .35); transform: translateY(-1.4vh); }
+    .item .p { font-size: 6vh; font-weight: 600; white-space: nowrap; transition: opacity .6s, filter .6s; }
+    .item .p i { font-style: normal; font-size: .5em; font-weight: 600; color: #9a7320; margin-right: .5vw; }
+    .item .p.soft { opacity: .15; filter: blur(6px); }
+    .item .b { font-size: 2.1vh; color: #7a6640; margin-left: 1.2vw; white-space: nowrap; }
+
+    .frame { position: relative; width: 36vw; height: 70vh; border-radius: 18vw 18vw 1.5vh 1.5vh; overflow: hidden; background: #efe6d1; box-shadow: 0 3vh 8vh rgba(80, 55, 10, .25); animation: fadein 1.4s ease .6s both; }
+    .frame:before { content: ''; position: absolute; top: 1.4vh; left: 1.4vh; right: 1.4vh; bottom: 1.4vh; border: 1px solid rgba(255, 255, 255, .75); border-radius: 17vw 17vw 1vh 1vh; z-index: 3; pointer-events: none; }
+    .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: opacity 2.4s ease; }
+    .slide.on { opacity: 1; animation: breathe 14s ease-in-out both; }
+    .slide.out { opacity: 0; transform: scale(1.1); }
+    @keyframes breathe { from { transform: scale(1); } to { transform: scale(1.1); } }
+    .monogram { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; opacity: 0; }
+    body.noimg .monogram { opacity: 1; }
+    .monogram svg { width: 30vh; height: 30vh; }
+    .monogram circle, .monogram path { fill: none; stroke: #9a7320; stroke-width: 1.2; stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw 4s ease-out 1s forwards, redraw 30s linear 8s infinite; }
+    .monogram b { font-size: 9vh; font-weight: 400; color: #9a7320; margin-top: -24vh; letter-spacing: .1em; }
+    .monogram span { margin-top: 16vh; font-size: 2.2vh; letter-spacing: .5em; text-transform: uppercase; color: #7a6640; }
+    .corner { position: absolute; width: 8vh; height: 8vh; border: 1px solid #9a7320; }
+    .corner.tl { top: 1.4vh; left: -1.2vw; border-width: 1px 0 0 1px; }
+    .corner.br { bottom: 1.4vh; right: -1.2vw; border-width: 0 1px 1px 0; }
+
+    footer { position: absolute; left: 5vw; right: 5vw; bottom: 3vh; text-align: center; animation: fadein 1.2s ease 2.2s both; }
+    .points { font-size: 2.3vh; letter-spacing: .25em; text-transform: uppercase; color: #5e4b22; }
+    .points span + span:before { content: '\25C6'; color: #9a7320; margin: 0 1.4vw; font-size: .7em; vertical-align: .3vh; }
+    .quote { height: 5.5vh; margin-top: 1.4vh; font-size: 3.2vh; font-style: italic; color: #2a1c00; opacity: 0; }
+    .quote.show { animation: quote 9s ease-in-out both; }
+    @keyframes quote { 0% { opacity: 0; transform: translateY(1vh); } 10%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-1vh); } }
+    .phone { margin-top: .6vh; font-size: 2.8vh; font-weight: 600; letter-spacing: .15em; color: #9a7320; }
+    .time { position: absolute; right: 5vw; top: 4vh; text-align: right; font-size: 2.2vh; letter-spacing: .25em; text-transform: uppercase; color: #7a6640; animation: fadein 1s ease 1s both; }
+    .time b { display: block; font-size: 4.6vh; font-weight: 400; letter-spacing: .08em; color: #2a1c00; }
+
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeup { from { opacity: 0; transform: translateY(2vh); } to { opacity: 1; transform: none; } }
+    .offline { position: fixed; right: 1vw; bottom: 1vh; font-size: 1.8vh; color: #7a6640; display: none; }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation: none !important; transition: none !important; } h1 span, .item, .rule, .frame, .sub, .unit, footer, .time { opacity: 1; transform: none; } .ornament path, .monogram circle, .monogram path { stroke-dashoffset: 0; } .slide.on { opacity: 1; } .quote.show { opacity: 1; } }
+  </style>
+</head>
+<body class="noimg">
+  <div class="bg"><div class="bokeh"><i></i><i></i><i></i><i></i></div></div>
+  <div class="screen">
+    <div class="left">
+      <svg class="ornament" viewBox="0 0 260 50"><path d="M4 25 C 40 5, 70 45, 105 25 S 160 5, 195 25 S 240 45, 256 25 M 118 25 l 12 -10 12 10 -12 10 z"/></svg>
+      <h1 class="serif" id="shop"></h1>
+      <p class="sub hide" id="sub"></p>
+      <div class="rule"></div>
+      <div class="unit" id="unit"></div>
+      <div class="list" id="list"></div>
+    </div>
+    <div class="right">
+      <div class="corner tl"></div>
+      <div class="frame">
+        <div class="slide" id="s0"></div><div class="slide" id="s1"></div>
+        <div class="monogram">
+          <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="92"/><circle cx="100" cy="100" r="80"/><path d="M100 22 l10 16 -10 16 -10 -16 z M100 146 l10 16 -10 16 -10 -16 z M22 100 l16 10 16 -10 -16 -10 z M146 100 l16 10 16 -10 -16 -10 z"/></svg>
+          <b class="serif" id="mono"></b>
+          <span>Fine gold jewellery</span>
+        </div>
+      </div>
+      <div class="corner br"></div>
+    </div>
+    <div class="time"><b id="hm"></b><span id="date"></span></div>
+    <footer>
+      <div class="points" id="points"></div>
+      <div class="quote" id="quote"></div>
+      <div class="phone" id="phone"></div>
+    </footer>
+  </div>
+  <div class="offline" id="offline">Reconnecting to the shop server</div>
+
+  <script src="/js/tv-common.js"></script>
+  <script>
+    (function () {
+      var T = window.TV;
+      var el = function (id) { return document.getElementById(id); };
+      var items = {};
+      var seen = {};
+
+      T.clock(function (c) {
+        el('hm').textContent = c.hh + ':' + c.mm + ' ' + c.ampm.toLowerCase().replace(/\./g, '');
+        el('date').textContent = c.day + ', ' + c.dom + ' ' + c.month;
+      });
+      var show = T.slideshow(el('s0'), el('s1'), 11000, function (url) { document.body.className = url ? '' : 'noimg'; });
+
+      function initials(name) {
+        var parts = name.split(/\s+/);
+        var out = '';
+        for (var i = 0; i < parts.length && i < 2; i++) if (parts[i]) out += parts[i][0].toUpperCase();
+        return out;
+      }
+
+      function item(karat) {
+        var row = T.make('div', 'item');
+        var k = T.make('div', 'k serif', karat + ' karat');
+        k.appendChild(T.make('small', '', T.FINENESS[karat] || ''));
+        var leader = T.make('div', 'leader');
+        var p = T.make('div', 'p');
+        var cur = T.make('i', '');
+        var num = T.make('span', '', '—');
+        p.appendChild(cur);
+        p.appendChild(num);
+        var b = T.make('div', 'b hide');
+        row.appendChild(k); row.appendChild(leader); row.appendChild(p); row.appendChild(b);
+        el('list').appendChild(row);
+        items[karat] = { p: p, cur: cur, num: num, b: b, shown: null };
+        return items[karat];
+      }
+
+      // A price changes by melting away and settling back, not by counting.
+      function settle(it, value) {
+        if (T.calm || it.shown === null) { it.num.textContent = T.price(value); return; }
+        it.p.className = 'p soft';
+        setTimeout(function () { it.num.textContent = T.price(value); it.p.className = 'p'; }, 650);
+      }
+
+      function render(data) {
+        var name = data.shop_name || 'Nusky Jewellers';
+        if (seen.name !== name) {
+          seen.name = name;
+          var h = el('shop');
+          h.innerHTML = '';
+          var words = name.split(/\s+/);
+          for (var w = 0; w < words.length; w++) {
+            var span = T.make('span', '', words[w]);
+            span.style.animationDelay = (0.4 + w * 0.25) + 's';
+            h.appendChild(span);
+            if (w < words.length - 1) h.appendChild(document.createTextNode(' '));
+          }
+          el('mono').textContent = initials(name);
+        }
+        el('sub').textContent = data.subtitle || '';
+        el('sub').className = data.subtitle ? 'sub' : 'sub hide';
+        el('unit').textContent = 'Today’s gold price, ' + T.unitLabel(data);
+        for (var i = 0; i < data.rates.length; i++) {
+          var r = data.rates[i];
+          var it = items[r.karat] || item(r.karat);
+          var sell = T.unitValue(r.sell_rate, data);
+          var buy = T.unitValue(r.buy_rate, data);
+          it.cur.textContent = sell > 0 ? (data.currency || '') : '';
+          if (it.shown !== sell) { settle(it, sell); it.shown = sell; }
+          it.b.textContent = 'we buy ' + T.price(buy);
+          it.b.className = data.show_buy && buy > 0 ? 'b' : 'b hide';
+        }
+        var pts = JSON.stringify(data.points);
+        if (seen.points !== pts) {
+          seen.points = pts;
+          var box = el('points');
+          box.innerHTML = '';
+          for (var n = 0; n < (data.points || []).length; n++) box.appendChild(T.make('span', '', data.points[n][0] + (data.points[n][1] ? ', ' + data.points[n][1].toLowerCase() : '')));
+        }
+        el('phone').textContent = data.phone ? 'Call us on ' + data.phone : '';
+        if (seen.message !== (data.message || '')) {
+          seen.message = data.message || '';
+          var q = el('quote');
+          clearInterval(seen.quoteTimer);
+          q.className = 'quote';
+          q.textContent = seen.message;
+          if (seen.message) {
+            var say = function () { q.className = 'quote'; void q.offsetWidth; q.className = 'quote show'; };
+            say();
+            seen.quoteTimer = setInterval(say, 14000);
+          }
+        }
+        show.set(T.imageUrls(data));
+      }
+
+      T.start(render, el('offline'), 'boutique');
+    })();
+  </script>
+</body>
+</html>

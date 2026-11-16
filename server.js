@@ -3,7 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { handleApi } = require('./src/api');
+const { handleApi, tvFileFor } = require('./src/api');
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -19,10 +19,10 @@ const MIME = {
   '.json': 'application/json; charset=utf-8',
 };
 
-function serveStatic(req, res, pathname) {
-  let rel = pathname;
+function serveStatic(req, res, url) {
+  let rel = url.pathname;
   if (rel === '/') rel = '/index.html';
-  if (rel === '/tv' || rel === '/tv/') rel = '/tv.html';
+  if (rel === '/tv' || rel === '/tv/') rel = '/' + tvFileFor(url.searchParams.get('theme'));
   let file;
   try {
     file = path.normalize(path.join(PUBLIC_DIR, decodeURIComponent(rel)));
@@ -65,7 +65,7 @@ const server = http.createServer((req, res) => {
   if (url.pathname.startsWith('/api/')) {
     handleApi(req, res, url);
   } else if (req.method === 'GET' || req.method === 'HEAD') {
-    serveStatic(req, res, url.pathname);
+    serveStatic(req, res, url);
   } else {
     res.writeHead(405).end('Method not allowed');
   }
