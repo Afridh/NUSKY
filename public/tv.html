@@ -6,22 +6,36 @@
   <title>Gold price today</title>
   <link rel="icon" href="data:,">
   <!-- The shop TV board. Written for smart TV browsers: flexbox, plain ES5 JavaScript, no build step.
-       Everything is sized in vh/vw so it fills any 16:9 screen. -->
+       Everything is sized in vh/vw so it fills any 16:9 screen.
+       Five designs, chosen on the Shop TV page or previewed with ?theme=royal|emerald|ruby|ivory|board -->
   <style>
+    /* ----- colours per design; the royal gold values are also the fallbacks for very old TV browsers ----- */
+    body { --bg: #050403; --glow: rgba(214, 160, 48, .34); --ink: #fff; --soft: #c9b98a; --sub: #dccfa6;
+      --gold: #e9c35a; --gold2: #f6dc8d; --gold3: #b8862b; --goldhi: #fff3c4; --tab-ink: #130c00;
+      --panel-a: rgba(66, 50, 15, .8); --panel-b: rgba(10, 8, 3, .92); --title-a: #2c220a; --title-b: #0a0803;
+      --points-a: #1a1405; --points-b: #060502; --frame-bg-a: #2b2009; --frame-bg-b: #070502; --tick-ink: #140d00; --horn-bg: #140d00; }
+    body.theme-emerald { --bg: #04201a; --glow: rgba(230, 187, 79, .3); --panel-a: rgba(16, 62, 48, .85); --panel-b: rgba(4, 26, 20, .95);
+      --title-a: #0d3a2d; --title-b: #04201a; --points-a: #0b3127; --points-b: #04201a; --frame-bg-a: #0f3d30; --frame-bg-b: #04201a; --horn-bg: #04201a; }
+    body.theme-ruby { --bg: #160406; --glow: rgba(230, 130, 90, .28); --panel-a: rgba(98, 18, 26, .82); --panel-b: rgba(22, 4, 6, .95);
+      --title-a: #4a0d14; --title-b: #160406; --points-a: #2c0a0f; --points-b: #160406; --frame-bg-a: #4a0d14; --frame-bg-b: #160406; --horn-bg: #160406; }
+    body.theme-ivory { --bg: #f3ecdc; --glow: rgba(201, 149, 43, .3); --ink: #2a1c00; --soft: #7a6640; --sub: #5e4b22;
+      --gold: #9a7320; --gold2: #c9952b; --gold3: #b08a3c; --goldhi: #e6bb4f;
+      --panel-a: #fffaf0; --panel-b: #f2e7d0; --title-a: #fffaf0; --title-b: #efe3c8; --points-a: #fff8ea; --points-b: #efe3c8;
+      --frame-bg-a: #efe3c8; --frame-bg-b: #d9c79c; --tick-ink: #2a1c00; --horn-bg: #2a1c00; }
+
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
-    body { font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #fff; cursor: none; }
+    body { background: #050403; background: var(--bg); font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #fff; color: var(--ink); cursor: none; }
     .serif { font-family: Cinzel, Constantia, 'Palatino Linotype', 'Book Antiqua', Georgia, 'Noto Serif', serif; }
-    .gold { color: #e9c35a; }
+    .gold { color: #e9c35a; color: var(--gold); }
     .hide { display: none !important; }
 
-    /* ----- backdrop: black marble with warm light, drifting gold dust on top ----- */
-    .bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    /* ----- backdrop: dark marble with warm light, drifting gold dust on top ----- */
+    .bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #050403; background: var(--bg); }
+    .bg:before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       background:
-        radial-gradient(ellipse at 12% 0%, rgba(214, 160, 48, .34), rgba(0, 0, 0, 0) 52%),
-        radial-gradient(ellipse at 92% 100%, rgba(214, 160, 48, .26), rgba(0, 0, 0, 0) 48%),
-        radial-gradient(ellipse at 60% 40%, rgba(90, 62, 12, .25), rgba(0, 0, 0, 0) 60%),
-        #050403; }
+        radial-gradient(ellipse at 12% 0%, var(--glow, rgba(214, 160, 48, .34)), rgba(0, 0, 0, 0) 52%),
+        radial-gradient(ellipse at 92% 100%, var(--glow, rgba(214, 160, 48, .26)), rgba(0, 0, 0, 0) 48%); }
     .bg:after { content: ''; position: absolute; top: -20%; bottom: -20%; left: -40%; width: 30%;
       background: linear-gradient(90deg, rgba(255, 232, 160, 0), rgba(255, 232, 160, .1), rgba(255, 232, 160, 0));
       transform: skewX(-22deg); animation: beam 11s ease-in-out infinite; }
@@ -31,19 +45,20 @@
     /* ----- top bar: date, shop name, clock ----- */
     .top { position: relative; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; height: 13.5vh; -webkit-flex: none; flex: none; margin-bottom: 1.5vh; animation: drop .9s cubic-bezier(.2, .8, .2, 1) both; }
     .top:after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: .35vh; border-radius: 1vh;
-      background: linear-gradient(90deg, #5c400c, #f6dc8d, #b8862b, #fff3c4, #b8862b, #f6dc8d, #5c400c); background-size: 200% 100%; animation: slide 7s linear infinite; box-shadow: 0 0 1.6vh rgba(246, 220, 141, .7); }
+      background: linear-gradient(90deg, #5c400c, #f6dc8d, #b8862b, #fff3c4, #b8862b, #f6dc8d, #5c400c);
+      background: linear-gradient(90deg, var(--gold3), var(--gold2), var(--gold3), var(--goldhi), var(--gold3), var(--gold2), var(--gold3)); background-size: 200% 100%; animation: slide 7s linear infinite; box-shadow: 0 0 1.6vh rgba(246, 220, 141, .7); }
     .date { width: 24%; padding-left: 1.2vw; font-weight: 700; font-size: 3.7vh; line-height: 1.25; white-space: nowrap; }
     .date b { display: block; }
     .brand { -webkit-flex: 1; flex: 1; text-align: center; min-width: 0; }
     .name { font-size: 6.4vh; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; line-height: 1.08; white-space: nowrap; }
     .name svg { height: 6vh; width: 6.8vh; vertical-align: -1vh; margin-right: .9vw; animation: gem 5s ease-in-out infinite; }
     .sub { font-size: 2.9vh; margin-top: .5vh; letter-spacing: .06em; }
-    .sub i { display: inline-block; width: 4.5vw; height: .25vh; vertical-align: middle; margin: 0 1vw; background: linear-gradient(90deg, rgba(233, 195, 90, 0), #e9c35a); }
-    .sub i + span + i { background: linear-gradient(90deg, #e9c35a, rgba(233, 195, 90, 0)); }
+    .sub i { display: inline-block; width: 4.5vw; height: .25vh; vertical-align: middle; margin: 0 1vw; background: linear-gradient(90deg, rgba(233, 195, 90, 0), #e9c35a); background: linear-gradient(90deg, transparent, var(--gold)); }
+    .sub i + span + i { background: linear-gradient(90deg, #e9c35a, rgba(233, 195, 90, 0)); background: linear-gradient(90deg, var(--gold), transparent); }
     .clock { width: 24%; padding-right: 1.2vw; text-align: right; font-size: 9.4vh; font-weight: 800; line-height: 1; white-space: nowrap; }
     .clock small { font-size: 3vh; margin-left: .4vw; letter-spacing: .05em; }
     .colon { animation: blink 1s steps(1) infinite; }
-    .slash { position: absolute; top: 4%; bottom: 10%; width: .4vh; background: linear-gradient(180deg, rgba(246, 220, 141, 0), #f6dc8d 40%, #b8862b); transform: skewX(-26deg); box-shadow: 0 0 1.4vh rgba(246, 220, 141, .8); }
+    .slash { position: absolute; top: 4%; bottom: 10%; width: .4vh; background: linear-gradient(180deg, rgba(246, 220, 141, 0), #f6dc8d 40%, #b8862b); background: linear-gradient(180deg, transparent, var(--gold2) 40%, var(--gold3)); transform: skewX(-26deg); box-shadow: 0 0 1.4vh rgba(246, 220, 141, .8); }
     .slash.l { left: 22.5%; }
     .slash.r { right: 23.5%; transform: skewX(26deg); }
 
@@ -51,27 +66,31 @@
     .mid { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; min-height: 0; }
     .prices { width: 37.5%; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; margin-right: 1.4vw; }
     .ptitle { -webkit-flex: none; flex: none; height: 10.5vh; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; padding: 0 1.3vw; margin-bottom: 1.2vh;
-      border: .3vh solid #b8862b; border-radius: 2vh; background: linear-gradient(180deg, #2c220a, #0a0803); box-shadow: 0 0 2.2vh rgba(230, 187, 79, .3); animation: fromleft .8s cubic-bezier(.2, .8, .2, 1) .15s both; }
+      border: .3vh solid #b8862b; border-color: var(--gold3); border-radius: 2vh; background: linear-gradient(180deg, #2c220a, #0a0803); background: linear-gradient(180deg, var(--title-a), var(--title-b)); box-shadow: 0 0 2.2vh rgba(230, 187, 79, .3); animation: fromleft .8s cubic-bezier(.2, .8, .2, 1) .15s both; }
     .ptitle div { -webkit-flex: 1; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; line-height: 1; }
     .ptitle b { display: block; font-size: 4.9vh; text-transform: uppercase; letter-spacing: .02em; }
     .ptitle span { display: block; font: 700 2.3vh 'Segoe UI', Roboto, Arial, sans-serif; letter-spacing: .04em; margin-top: .6vh; }
     .ptitle svg { -webkit-flex: none; flex: none; height: 7.2vh; width: 9.2vh; animation: gem 4s ease-in-out infinite; }
     .prows { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; min-height: 0; }
     .prow { position: relative; -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; margin-bottom: 1.2vh; overflow: hidden;
-      border: .3vh solid #b8862b; border-radius: 1.7vh; background: linear-gradient(180deg, rgba(66, 50, 15, .8), rgba(10, 8, 3, .92));
-      box-shadow: 0 0 2.2vh rgba(230, 187, 79, .28), inset 0 0 2.4vh rgba(0, 0, 0, .65); animation: fromleft .8s cubic-bezier(.2, .8, .2, 1) both, glow 4s ease-in-out infinite; }
+      border: .3vh solid #b8862b; border-color: var(--gold3); border-radius: 1.7vh; background: linear-gradient(180deg, rgba(66, 50, 15, .8), rgba(10, 8, 3, .92)); background: linear-gradient(180deg, var(--panel-a), var(--panel-b));
+      box-shadow: 0 0 2.2vh rgba(230, 187, 79, .28), inset 0 0 2.4vh rgba(0, 0, 0, .25); animation: fromleft .8s cubic-bezier(.2, .8, .2, 1) both, glow 4s ease-in-out infinite; }
     .prow:last-child { margin-bottom: 0; }
     .prow:nth-child(1) { animation-delay: .3s, 0s; }
     .prow:nth-child(2) { animation-delay: .45s, 1s; }
     .prow:nth-child(3) { animation-delay: .6s, 2s; }
     .prow:nth-child(4) { animation-delay: .75s, 3s; }
     /* a point of light runs along the bottom edge of each row */
-    .prow:after { content: ''; position: absolute; bottom: 0; left: -35%; width: 35%; height: .55vh; background: linear-gradient(90deg, rgba(255, 243, 196, 0), #fff3c4, rgba(255, 243, 196, 0)); animation: runner 3.6s linear infinite; }
+    .prow:after { content: ''; position: absolute; bottom: 0; left: -35%; width: 35%; height: .55vh; background: linear-gradient(90deg, rgba(255, 243, 196, 0), #fff3c4, rgba(255, 243, 196, 0)); background: linear-gradient(90deg, transparent, var(--goldhi), transparent); animation: runner 3.6s linear infinite; }
     .prow:nth-child(2):after { animation-delay: .9s; }
     .prow:nth-child(3):after { animation-delay: 1.8s; }
     .prow:nth-child(4):after { animation-delay: 2.7s; }
+    /* a changed price: the whole row lights up, then settles (an overlay, so the row's own animations keep running) */
+    .prow:before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff3c4; opacity: 0; pointer-events: none; z-index: 2; }
+    .prow.flash:before { animation: flashfade 1.6s ease-out; }
+    .prow.flash .pval { animation: pop 1s cubic-bezier(.2, .8, .2, 1); }
     .ktab { position: relative; overflow: hidden; width: 35%; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
-      background: linear-gradient(100deg, #7a560f 0%, #d9a93a 30%, #fff0ad 50%, #d9a93a 70%, #7a560f 100%); color: #130c00; font-weight: 800; font-size: 7.4vh; line-height: 1; }
+      background: linear-gradient(100deg, #7a560f 0%, #d9a93a 30%, #fff0ad 50%, #d9a93a 70%, #7a560f 100%); color: #130c00; color: var(--tab-ink); font-weight: 800; font-size: 7.4vh; line-height: 1; }
     .ktab small { font-size: 2.1vh; letter-spacing: .7vh; margin-top: .5vh; padding-left: .7vh; opacity: .75; }
     .ktab:after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .8), rgba(255, 255, 255, 0)); animation: sheen 5s ease-in-out infinite; }
     .prow:nth-child(2) .ktab:after { animation-delay: .4s; }
@@ -80,16 +99,12 @@
     .pval { -webkit-flex: 1; flex: 1; min-width: 0; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-end; align-items: flex-end; -webkit-justify-content: center; justify-content: center; padding: 0 1.5vw 0 .6vw; white-space: nowrap; overflow: hidden; }
     .sell { font-size: 7.2vh; font-weight: 800; line-height: 1.08; }
     .sell i { font-style: normal; font-size: .55em; font-weight: 700; margin-right: .5vw; }
-    .buy { font-size: 2.8vh; color: #dccfa6; margin-top: .2vh; }
-    /* a changed price: the whole row lights up, then settles (an overlay, so the row's own animations keep running) */
-    .prow:before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff3c4; opacity: 0; pointer-events: none; z-index: 2; }
-    .prow.flash:before { animation: flashfade 1.6s ease-out; }
-    .prow.flash .pval { animation: pop 1s cubic-bezier(.2, .8, .2, 1); }
+    .buy { font-size: 2.8vh; color: #dccfa6; color: var(--sub); margin-top: .2vh; }
 
     .photo { position: relative; -webkit-flex: 1; flex: 1; min-width: 0; padding: .45vh; border-radius: 2.1vh;
       background: linear-gradient(120deg, #7a560f, #f6dc8d, #b8862b, #fff0ad, #7a560f, #f6dc8d, #7a560f); background-size: 300% 300%;
       box-shadow: 0 0 3.2vh rgba(230, 187, 79, .4); animation: zoomin 1s cubic-bezier(.2, .8, .2, 1) .35s both, frame 9s linear infinite; }
-    .frame { position: relative; width: 100%; height: 100%; border-radius: 1.7vh; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #2b2009, #070502 70%); }
+    .frame { position: relative; width: 100%; height: 100%; border-radius: 1.7vh; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #2b2009, #070502 70%); background: radial-gradient(ellipse at 50% 45%, var(--frame-bg-a), var(--frame-bg-b) 70%); }
     .slide { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.8s ease; }
     .slide.on { opacity: 1; animation: kenburns 10s ease-out both; }
     .slide.out { opacity: 0; transform: scale(1.14); }
@@ -97,38 +112,54 @@
     /* shown until the shop adds its own pictures */
     .emblem { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; text-align: center; }
     .emblem .halo { position: relative; width: 36vh; height: 36vh; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; }
-    .emblem .halo i { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: .25vh solid #e9c35a; border-radius: 50%; opacity: 0; animation: ring 4.5s ease-out infinite; }
+    .emblem .halo i { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: .25vh solid #e9c35a; border-color: var(--gold); border-radius: 50%; opacity: 0; animation: ring 4.5s ease-out infinite; }
     .emblem .halo i + i { animation-delay: 1.5s; }
     .emblem .halo i + i + i { animation-delay: 3s; }
     .emblem svg { width: 22vh; height: 19vh; animation: gem 5s ease-in-out infinite; }
     .emblem b { font-size: 5vh; letter-spacing: .1em; text-transform: uppercase; margin-top: 1vh; }
     .emblem span { font-size: 3vh; letter-spacing: .5vh; margin-top: 1vh; }
+    .gem { stroke: #f6dc8d; stroke: var(--gold2); fill: rgba(246, 220, 141, .18); }
+
+    /* ----- the "board" design: no photo panel, prices right across the screen with buying price beside ----- */
+    body.layout-board .photo { display: none; }
+    body.layout-board .prices { width: 100%; margin-right: 0; }
+    body.layout-board .ktab { width: 22%; font-size: 8.4vh; }
+    body.layout-board .pval { -webkit-flex-direction: row; flex-direction: row; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; padding: 0 2.4vw 0 2vw; }
+    body.layout-board .sell { font-size: 9vh; }
+    body.layout-board .buy { font-size: 6vh; margin: 0; }
+    body.layout-board .buy.hide { display: block !important; visibility: hidden; }
+    body.layout-board .ptitle { -webkit-justify-content: space-between; justify-content: space-between; }
+    body.layout-board .ptitle { padding-right: 1.3vw; }
+    body.layout-board .ptitle > div:first-child { -webkit-flex: none; flex: none; width: 22%; }
+    body.layout-board .ptitle .heads { display: -webkit-flex; display: flex; -webkit-flex: 1; flex: 1; -webkit-justify-content: space-between; justify-content: space-between; padding: 0 2.4vw 0 2vw; font: 700 2.8vh 'Segoe UI', Roboto, Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+    body.layout-board .ptitle .heads span:last-child { margin-right: 10vh; }
+    .ptitle .heads { display: none; }
 
     /* ----- selling points ----- */
     .points { -webkit-flex: none; flex: none; height: 9.6vh; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; margin-top: 1.5vh; padding: 0 .6vw;
-      border-top: .3vh solid #b8862b; border-bottom: .3vh solid #b8862b; border-radius: 1.6vh; background: linear-gradient(180deg, #1a1405, #060502); animation: rise .9s cubic-bezier(.2, .8, .2, 1) .7s both; }
+      border-top: .3vh solid #b8862b; border-bottom: .3vh solid #b8862b; border-color: var(--gold3); border-radius: 1.6vh; background: linear-gradient(180deg, #1a1405, #060502); background: linear-gradient(180deg, var(--points-a), var(--points-b)); animation: rise .9s cubic-bezier(.2, .8, .2, 1) .7s both; }
     /* each point is as wide as its words need, so a longer one borrows room from a shorter one */
-    .pt { -webkit-flex: 1 1 auto; flex: 1 1 auto; min-width: 0; height: 62%; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; padding: 0 1.3vw; border-right: .25vh solid #b8862b; }
+    .pt { -webkit-flex: 1 1 auto; flex: 1 1 auto; min-width: 0; height: 62%; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; padding: 0 1.3vw; border-right: .25vh solid #b8862b; border-color: var(--gold3); }
     .pt:last-child { border-right: 0; }
-    .pt svg { -webkit-flex: none; flex: none; width: 5vh; height: 5vh; margin-right: .9vw; animation: beat 6s ease-in-out infinite; }
+    .pt svg { -webkit-flex: none; flex: none; width: 5vh; height: 5vh; margin-right: .9vw; animation: beat 6s ease-in-out infinite; stroke: #e9c35a; stroke: var(--gold); }
     .pt:nth-child(2) svg { animation-delay: 1.5s; }
     .pt:nth-child(3) svg { animation-delay: 3s; }
     .pt:nth-child(4) svg { animation-delay: 4.5s; }
     .pt div { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; line-height: 1.2; }
     .pt b { display: block; font-size: 2.7vh; letter-spacing: .03em; overflow: hidden; text-overflow: ellipsis; }
-    .pt span { display: block; font-size: 2.1vh; color: #e8dfc4; letter-spacing: .03em; overflow: hidden; text-overflow: ellipsis; }
-    .pt.contact b { color: #e9c35a; text-transform: none; }
-    .pt.contact span { font-size: 3.3vh; font-weight: 800; color: #fff; }
+    .pt span { display: block; font-size: 2.1vh; color: #e8dfc4; color: var(--sub); letter-spacing: .03em; overflow: hidden; text-overflow: ellipsis; }
+    .pt.contact b { color: #e9c35a; color: var(--gold); text-transform: none; }
+    .pt.contact span { font-size: 3.3vh; font-weight: 800; color: #fff; color: var(--ink); }
 
     /* ----- offer ticker ----- */
     .ticker { -webkit-flex: none; flex: none; height: 6.2vh; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; margin-top: 1vh; overflow: hidden; border-radius: 1.1vh;
-      background: linear-gradient(90deg, #7a560f, #e6bb4f 20%, #fff0ad 50%, #e6bb4f 80%, #7a560f); background-size: 200% 100%; color: #140d00; font-weight: 800; font-size: 3.4vh; animation: rise .9s cubic-bezier(.2, .8, .2, 1) .85s both, slide 8s linear infinite; }
-    .horn { -webkit-flex: none; flex: none; height: 100%; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; padding: 0 1.3vw; background: #140d00; }
+      background: linear-gradient(90deg, #7a560f, #e6bb4f 20%, #fff0ad 50%, #e6bb4f 80%, #7a560f); background-size: 200% 100%; color: #140d00; color: var(--tick-ink); font-weight: 800; font-size: 3.4vh; animation: rise .9s cubic-bezier(.2, .8, .2, 1) .85s both, slide 8s linear infinite; }
+    .horn { -webkit-flex: none; flex: none; height: 100%; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; padding: 0 1.3vw; background: #140d00; background: var(--horn-bg); }
     .horn svg { width: 4.4vh; height: 4.4vh; animation: beat 2.4s ease-in-out infinite; }
     .run { -webkit-flex: 1; flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; }
     .run div { display: inline-block; animation: marquee 30s linear infinite; }
     .run span { display: inline-block; white-space: pre; }
-    .offline { position: fixed; right: 1vw; top: 1vh; font-size: 1.8vh; color: #c9b98a; display: none; }
+    .offline { position: fixed; right: 1vw; top: 1vh; font-size: 1.8vh; color: #c9b98a; color: var(--soft); display: none; }
 
     @keyframes beam { 0%, 55% { left: -40%; } 100% { left: 130%; } }
     @keyframes slide { from { background-position: 200% 0; } to { background-position: 0 0; } }
@@ -137,7 +168,7 @@
     @keyframes rise { from { opacity: 0; transform: translateY(5vh); } to { opacity: 1; transform: none; } }
     @keyframes fromleft { from { opacity: 0; transform: translateX(-8vw); } to { opacity: 1; transform: none; } }
     @keyframes zoomin { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
-    @keyframes glow { 0%, 100% { box-shadow: 0 0 2.2vh rgba(230, 187, 79, .28), inset 0 0 2.4vh rgba(0, 0, 0, .65); } 50% { box-shadow: 0 0 3.6vh rgba(246, 220, 141, .6), inset 0 0 2.4vh rgba(0, 0, 0, .65); } }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 2.2vh rgba(230, 187, 79, .28), inset 0 0 2.4vh rgba(0, 0, 0, .25); } 50% { box-shadow: 0 0 3.6vh rgba(246, 220, 141, .6), inset 0 0 2.4vh rgba(0, 0, 0, .25); } }
     @keyframes runner { from { transform: translateX(0); } to { transform: translateX(400%); } }
     @keyframes sheen { 0%, 62% { transform: translateX(-140%) skewX(-20deg); } 100% { transform: translateX(380%) skewX(-20deg); } }
     @keyframes gem { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 .6vh rgba(246, 220, 141, .5)); } 50% { transform: scale(1.07); filter: drop-shadow(0 0 2vh rgba(255, 243, 196, 1)); } }
@@ -152,7 +183,7 @@
 
     /* shimmering gold lettering, only where the browser can clip a gradient to text */
     @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-      .gold { background: linear-gradient(100deg, #b8862b 0%, #f6dc8d 28%, #fff3c4 50%, #f6dc8d 72%, #b8862b 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: glint 7s linear infinite; }
+      .gold { background: linear-gradient(100deg, var(--gold3, #b8862b) 0%, var(--gold2, #f6dc8d) 28%, var(--goldhi, #fff3c4) 50%, var(--gold2, #f6dc8d) 72%, var(--gold3, #b8862b) 100%); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: glint 7s linear infinite; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -170,9 +201,9 @@
       <i class="slash l"></i>
       <div class="brand">
         <div class="name serif">
-          <svg viewBox="0 0 64 56" fill="none" stroke="#f6dc8d" stroke-width="2.600" stroke-linejoin="round"><path d="M14 3h36l12 15-30 35L2 18 14 3z" fill="rgba(246,220,141,.18)"/><path d="M2 18h60M23 3l-9 15 18 35 18-35-9-15M23 3l9 15 9-15"/></svg><span class="gold" id="shop">Nusky Jewellers</span>
+          <svg viewBox="0 0 64 56" fill="none" stroke-width="2.600" stroke-linejoin="round"><path class="gem" d="M14 3h36l12 15-30 35L2 18 14 3z"/><path class="gem" style="fill:none" d="M2 18h60M23 3l-9 15 18 35 18-35-9-15M23 3l9 15 9-15"/></svg><span class="gold" id="shop">Nusky Jewellers</span>
         </div>
-        <div class="sub gold-sub hide" id="subwrap"><i></i><span class="gold" id="sub"></span><i></i></div>
+        <div class="sub hide" id="subwrap"><i></i><span class="gold" id="sub"></span><i></i></div>
       </div>
       <i class="slash r"></i>
       <div class="clock"><span class="gold"><span id="hh"></span><span class="colon">:</span><span id="mm"></span></span><small class="gold" id="ap"></small></div>
@@ -182,6 +213,7 @@
       <div class="prices">
         <div class="ptitle serif">
           <div><b class="gold">Gold price</b><span class="gold" id="unit"></span></div>
+          <div class="heads gold"><span>We sell at</span><span>We buy at</span></div>
           <svg viewBox="0 0 72 56" stroke="#7a560f" stroke-width="1.500" stroke-linejoin="round"><path d="M22 6h20l5 13H17l5-13z" fill="#f6dc8d"/><path d="M17 19h30v6H17z" fill="#d9a93a"/><path d="M6 31h20l5 13H1l5-13z" fill="#f6dc8d"/><path d="M1 44h30v6H1z" fill="#d9a93a"/><path d="M46 31h20l5 13H41l5-13z" fill="#f6dc8d"/><path d="M41 44h30v6H41z" fill="#d9a93a"/></svg>
         </div>
         <div class="prows" id="rates"></div>
@@ -190,7 +222,7 @@
         <div class="frame">
           <div class="emblem" id="emblem">
             <div class="halo"><i></i><i></i><i></i>
-              <svg viewBox="0 0 64 56" fill="none" stroke="#f6dc8d" stroke-width="1.600" stroke-linejoin="round"><path d="M14 3h36l12 15-30 35L2 18 14 3z" fill="rgba(246,220,141,.14)"/><path d="M2 18h60M23 3l-9 15 18 35 18-35-9-15M23 3l9 15 9-15"/></svg>
+              <svg viewBox="0 0 64 56" fill="none" stroke-width="1.600" stroke-linejoin="round"><path class="gem" d="M14 3h36l12 15-30 35L2 18 14 3z"/><path class="gem" style="fill:none" d="M2 18h60M23 3l-9 15 18 35 18-35-9-15M23 3l9 15 9-15"/></svg>
             </div>
             <b class="serif gold" id="emblem-name"></b>
             <span class="gold">24K 22K 21K 18K</span>
@@ -212,6 +244,7 @@
   <script>
     (function () {
       var FINENESS = { 24: '999', 22: '916', 21: '875', 18: '750' };
+      var THEMES = ['royal', 'emerald', 'ruby', 'ivory', 'board'];
       var ICONS = [
         '<path d="M5 3h14l4 6-11 12L1 9l4-6z"/><path d="M1 9h22M9 3L7 9l5 12 5-12-2-6"/>',
         '<path d="M12 2l8 3v6c0 5-3.500 9-8 11-4.500-2-8-6-8-11V5l8-3z"/><path d="M8.500 12l2.500 2.500 4.500-5"/>',
@@ -223,6 +256,12 @@
       var rows = {};
       var shown = {};
       var seen = {};
+      var dustTone = [246, 220, 141];
+      // ?theme=... previews a design on this screen only, without changing the shop's setting
+      var forcedTheme = (function () {
+        var m = /[?&]theme=([a-z]+)/.exec(window.location.search);
+        return m && THEMES.indexOf(m[1]) >= 0 ? m[1] : null;
+      })();
 
       function el(id) { return document.getElementById(id); }
       function make(tag, cls, text) {
@@ -235,6 +274,14 @@
         var span = document.createElement('span');
         span.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#e9c35a" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>';
         return span.firstChild;
+      }
+
+      function applyTheme(name) {
+        if (THEMES.indexOf(name) < 0) name = 'royal';
+        if (seen.theme === name) return;
+        seen.theme = name;
+        document.body.className = 'theme-' + name + (name === 'board' ? ' layout-board' : '');
+        dustTone = name === 'ivory' ? [154, 115, 32] : [246, 220, 141];
       }
 
       function price(n) {
@@ -267,8 +314,9 @@
       function fit(parts, finalText) {
         parts.sell.style.fontSize = '';
         parts.num.textContent = finalText;
-        var size = 7.2;
+        var size = seen.theme === 'board' ? 9 : 7.2;
         var room = parts.val.clientWidth - window.innerWidth * 0.024; // less the row's side padding
+        if (seen.theme === 'board') room = room / 2 - window.innerWidth * 0.02; // the buying price sits beside it
         while (parts.sell.offsetWidth > room && size > 3.6) {
           size -= 0.4;
           parts.sell.style.fontSize = size + 'vh';
@@ -394,6 +442,8 @@
 
       function show(data) {
         el('offline').style.display = 'none';
+        var themeBefore = seen.theme;
+        applyTheme(forcedTheme || data.theme || 'royal');
         var name = data.shop_name || 'Nusky Jewellers';
         el('shop').textContent = name;
         el('emblem-name').textContent = name;
@@ -401,17 +451,18 @@
         el('subwrap').className = data.subtitle ? 'sub' : 'sub hide';
         el('unit').textContent = (data.currency ? data.currency + ' ' : '') + (data.show_pavan ? 'per pavan (8 g)' : 'per gram');
         var times = data.show_pavan ? 8 : 1;
+        var board = seen.theme === 'board';
         for (var i = 0; i < data.rates.length; i++) {
           var r = data.rates[i];
           var parts = rows[r.karat] || makeRow(r.karat);
           var sell = Math.round(r.sell_rate * times * 100) / 100;
           var buy = Math.round(r.buy_rate * times * 100) / 100;
           parts.cur.textContent = sell > 0 ? (data.currency || '') : '';
-          parts.buy.textContent = 'We buy at ' + price(buy);
-          parts.buy.className = data.show_buy && buy > 0 ? 'buy' : 'buy hide';
-          if (shown[r.karat] !== sell) {
+          parts.buy.textContent = (board ? '' : 'We buy at ') + price(buy);
+          parts.buy.className = (data.show_buy || board) && buy > 0 ? 'buy' : 'buy hide';
+          if (shown[r.karat] !== sell || themeBefore !== seen.theme) {
             var from = shown[r.karat] || 0;
-            if (shown[r.karat] !== undefined) flash(parts.row);
+            if (shown[r.karat] !== undefined && shown[r.karat] !== sell) flash(parts.row);
             shown[r.karat] = sell;
             fit(parts, price(sell));
             roll(parts.num, from, sell);
@@ -472,6 +523,7 @@
           var dt = last === null ? 0 : Math.min(0.1, (t - last) / 1000);
           last = t;
           ctx.clearRect(0, 0, w, h);
+          var tone = dustTone.join(',');
           for (var n = 0; n < specks.length; n++) {
             var s = specks[n];
             s.y -= s.rise * dt;
@@ -481,11 +533,11 @@
             var x = (s.x + Math.sin(s.sway * 0.5) * 0.008) * w;
             var y = s.y * h;
             var r = s.r * h / 1080;
-            ctx.fillStyle = 'rgba(246,220,141,' + (alpha * 0.25).toFixed(3) + ')';
+            ctx.fillStyle = 'rgba(' + tone + ',' + (alpha * 0.25).toFixed(3) + ')';
             ctx.beginPath();
             ctx.arc(x, y, r * 3.2, 0, 6.2832);
             ctx.fill();
-            ctx.fillStyle = 'rgba(255,243,196,' + alpha.toFixed(3) + ')';
+            ctx.fillStyle = 'rgba(' + tone + ',' + alpha.toFixed(3) + ')';
             ctx.beginPath();
             ctx.arc(x, y, r, 0, 6.2832);
             ctx.fill();
@@ -495,6 +547,7 @@
         raf(frame);
       }
 
+      if (forcedTheme) applyTheme(forcedTheme);
       tick();
       setInterval(tick, 5000);
       dust();

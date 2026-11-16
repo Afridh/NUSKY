@@ -94,6 +94,28 @@
     renderThumbs(pictures);
 
     // ----- wording -----
+    // ----- design -----
+    const DESIGNS = [
+      ['royal', 'Royal gold', 'Black and gold, photo beside the prices. The look from the reference picture.'],
+      ['emerald', 'Emerald', 'Deep green and gold, matching the counter screens.'],
+      ['ruby', 'Ruby', 'Deep red and gold.'],
+      ['ivory', 'Ivory', 'Light cream and gold for a bright showroom.'],
+      ['board', 'Classic board', 'No photo. Selling and buying prices right across the screen, for a shop that wants prices only.'],
+    ];
+    let theme = tv.theme || 'royal';
+    const designs = h('div', { class: 'designs' }, DESIGNS.map(([id, name, note]) => h('label', { class: `design ${id === theme ? 'on' : ''}` },
+      h('input', {
+        type: 'radio', name: 'tv-design', value: id, checked: id === theme,
+        onchange: () => {
+          theme = id;
+          for (const d of designs.children) d.classList.toggle('on', d.querySelector('input').value === id);
+          frame.src = `/tv?theme=${id}`;
+        },
+      }),
+      h('span', { class: `swatch sw-${id}` }), h('b', { text: name }), h('small', { text: note }))));
+    const demoLinks = h('p', { class: 'small muted' }, 'To show a design on the TV without changing the setting, open: ',
+      DESIGNS.map(([id, name], i) => [i ? ', ' : '', h('a', { href: `/tv?theme=${id}`, target: '_blank', rel: 'noopener', text: name })]));
+
     const subtitle = h('input', { type: 'text', maxlength: 80, value: tv.subtitle || '', placeholder: 'For example: Colombo 03' });
     const message = h('input', { type: 'text', maxlength: 300, value: tv.message || '' });
     const unit = h('select', { value: tv.show_pavan ? 'pavan' : 'gram' },
@@ -108,8 +130,10 @@
     save.addEventListener('click', busy(save, async () => {
       await api('PUT', '/api/tv', {
         subtitle: subtitle.value, message: message.value, show_pavan: unit.value === 'pavan', show_buy: showBuy.checked,
+        theme,
         points: points.map(([a, b]) => [a.value, b.value]),
       });
+      frame.src = '/tv';
       toast('The TV is showing your changes', 'good');
     }));
 
@@ -118,6 +142,9 @@
         h('div', { class: 'panel' }, h('h2', { text: 'Photos on the TV' }),
           h('p', { class: 'muted small', text: 'Photos of your jewellery. The TV shows them one after another in the large space beside the prices. Wide (landscape) photos fit best. Up to 20.' }),
           zone, picker, thumbs),
+        h('div', { class: 'panel' }, h('h2', { text: 'Design' }),
+          h('p', { class: 'muted small', text: 'Pick one and the preview changes at once. Press "Update the TV" below to put it on the TV.' }),
+          designs, demoLinks),
         h('div', { class: 'panel' }, h('h2', { text: 'What the TV says' }),
           field('Line under the shop name', subtitle, 'Usually the town or branch. Leave empty to hide it.'),
           h('div', { class: 'row' }, field('Show prices', unit), h('label', { class: 'check', style: 'margin-bottom:1.2em' }, showBuy, h('span', null, 'Also show our buying price'))),

@@ -87,6 +87,12 @@ The TV shows the date, shop name and clock, today's price for each karat, a
 slideshow of your jewellery photos, three selling points with your phone
 number, and a scrolling offer line. Set it all up on the Shop TV page:
 
+- **Design**: five looks. Royal gold (black and gold, as in the reference
+  picture), Emerald (green and gold, like the counter screens), Ruby (red and
+  gold), Ivory (light cream and gold) and Classic board (no photo; selling and
+  buying prices across the whole screen). To show a design on the TV without
+  changing the setting, open the TV address with `?theme=emerald` (or royal,
+  ruby, ivory, board) on the end.
 - **Pictures**: press "Add pictures" and choose photos of your jewellery (wide
   photos fit best, up to 20). Until you add some, the TV shows the shop emblem.
 - **Prices**: choose per gram or per pavan (8 grams), and whether to show the

@@ -141,6 +141,9 @@ setInterval(() => {
   }
 }, 25000).unref();
 
+// The looks the TV board can wear. 'board' is the royal colours without the photo panel.
+const TV_THEMES = ['royal', 'emerald', 'ruby', 'ivory', 'board'];
+
 const TV_DIR = path.join(DATA_DIR, 'tv');
 fs.mkdirSync(TV_DIR, { recursive: true });
 
@@ -171,6 +174,7 @@ function tvPayload() {
     message: s.tv_message,
     show_pavan: s.tv_show_pavan === '1',
     show_buy: s.tv_show_buy === '1',
+    theme: TV_THEMES.includes(s.tv_theme) ? s.tv_theme : 'royal',
     points: tvPoints(s.tv_points),
     images: tvImages(),
     rates: getRates(),
@@ -1168,6 +1172,10 @@ add('PUT', '/api/tv', ['admin', 'manager'], ({ body }) => {
   if (body.message !== undefined) set.run('tv_message', str(body.message, 'TV message', { max: 300 }));
   if (body.show_pavan !== undefined) set.run('tv_show_pavan', body.show_pavan ? '1' : '0');
   if (body.show_buy !== undefined) set.run('tv_show_buy', body.show_buy ? '1' : '0');
+  if (body.theme !== undefined) {
+    if (!TV_THEMES.includes(body.theme)) throw bad(`The TV design must be one of: ${TV_THEMES.join(', ')}.`);
+    set.run('tv_theme', body.theme);
+  }
   if (body.subtitle !== undefined) set.run('tv_subtitle', str(body.subtitle, 'Line under the shop name', { max: 80 }));
   if (body.points !== undefined) {
     if (!Array.isArray(body.points) || body.points.length > 3) throw bad('Send up to three selling points.');
@@ -1324,6 +1332,7 @@ add('PUT', '/api/settings', ['admin'], ({ body }) => {
       if (body[key] === undefined || key === 'tv_points') continue; // tv_points goes through PUT /api/tv, which checks its shape
       let value = str(body[key], key, { max: limits[key] || 120 });
       if (key === 'tax_percent') value = String(num(value || 0, 'Tax percent', { min: 0, max: 100 }));
+      if (key === 'tv_theme' && !TV_THEMES.includes(value)) throw bad('That TV design does not exist.');
       if (key === 'cashier_edit_rate' || key === 'tv_show_pavan' || key === 'tv_show_buy') value = value === '1' || value === 'true' ? '1' : '0';
       if (key === 'country_code') value = value.replace(/\D/g, '');
       if (key === 'shop_name' && !value) throw bad('The shop name cannot be empty.');

@@ -537,3 +537,18 @@ dialog footer { display: flex; justify-content: flex-end; gap: .6rem; padding: .
   .hero { grid-template-columns: 1fr; gap: .9rem; }
   .hero .big { font-size: 2.3rem; }
 }
+
+/* ----- TV design chooser ----- */
+.designs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; margin-bottom: .6rem; }
+.design { position: relative; display: block; padding: .7rem .8rem .75rem; border: 2px solid var(--line); border-radius: 10px; cursor: pointer; transition: border-color .15s, transform .15s var(--ease), box-shadow .15s; }
+.design:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(7, 41, 32, .12); }
+.design.on { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(230, 187, 79, .35); }
+.design input { position: absolute; opacity: 0; pointer-events: none; }
+.design .swatch { display: block; height: 46px; border-radius: 6px; margin-bottom: .5rem; border: 1px solid rgba(0, 0, 0, .15); }
+.design b { display: block; }
+.design small { display: block; color: var(--muted); line-height: 1.3; margin-top: .15rem; }
+.sw-royal { background: linear-gradient(135deg, #050403 55%, #b8862b 56%, #f6dc8d 75%, #b8862b); }
+.sw-emerald { background: linear-gradient(135deg, #04201a 55%, #b8862b 56%, #f6dc8d 75%, #b8862b); }
+.sw-ruby { background: linear-gradient(135deg, #160406 55%, #b8862b 56%, #f6dc8d 75%, #b8862b); }
+.sw-ivory { background: linear-gradient(135deg, #f3ecdc 55%, #c9952b 56%, #e6bb4f 75%, #9a7320); }
+.sw-board { background: repeating-linear-gradient(180deg, #050403 0 9px, #b8862b 9px 11px); }

@@ -206,6 +206,7 @@ const DEFAULT_SETTINGS = {
   tv_message: 'Welcome to Nusky Jewellers',
   tv_show_pavan: '0',
   tv_show_buy: '0',
+  tv_theme: 'royal',
   tv_subtitle: '',
   tv_points: JSON.stringify([
     ['Pure gold', 'Genuine quality'],
